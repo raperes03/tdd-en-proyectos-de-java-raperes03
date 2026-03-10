@@ -1,0 +1,35 @@
+name: Publish Javadoc (stable)
+
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+
+      - name: Generate Javadoc
+        run: |
+          mkdir -p javadoc
+          javadoc -d javadoc -sourcepath src -subpackages com.tt1.test -encoding UTF-8 -charset UTF-8
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./javadoc
+
+  deploy:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
