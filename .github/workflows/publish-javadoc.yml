@@ -15,12 +15,13 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
+          distribution: 'temurin'     
           java-version: '17'
 
       - name: Generate Javadoc
         run: |
           mkdir -p javadoc
-          javadoc -d javadoc -sourcepath src -subpackages com.tt1.test -encoding UTF-8 -charset UTF-8
+          javadoc -d javadoc -sourcepath src/main/java -subpackages com.tt1.test -encoding UTF-8 -charset UTF-8
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v1
