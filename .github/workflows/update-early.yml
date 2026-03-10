@@ -1,0 +1,59 @@
+name: Update early
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+
+      - name: Run tests (Maven)
+        run: |
+          if [ -f pom.xml ]; then
+            mvn -B test
+            exit $?
+          elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+            ./gradlew test
+            exit $?
+          else
+            echo "No build file found; skipping tests"
+            exit 1
+          fi
+
+  update-early:
+    needs: test
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main again
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git for push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Force update early branch with current main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
+          git checkout -B early
+          git push origin early --force
