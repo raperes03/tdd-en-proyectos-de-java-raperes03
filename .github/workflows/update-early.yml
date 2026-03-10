@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: write  
+  contents: write
 
 jobs:
   test:
@@ -20,6 +20,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Run tests (Maven)
